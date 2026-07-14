@@ -86,11 +86,12 @@ function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
-    // Cria um contêiner temporário oculto para montar o layout do PDF
     const container = document.createElement('div');
+    // Largura fixa travada em 800px para garantir que não corte nas laterais
+    container.style.width = '800px'; 
     container.style.padding = '20px';
     container.style.fontFamily = 'Helvetica, Arial, sans-serif';
-    container.style.backgroundColor = '#ffffff'; // Força fundo branco no PDF
+    container.style.backgroundColor = '#ffffff'; 
     container.style.color = '#000000';
 
     let content = `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 22px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
@@ -98,26 +99,25 @@ function printWeek(week) {
     for(let d = 1; d <= 5; d++) {
         const workout = workoutLibrary[phase][d];
         content += `
-            <div style="margin-top: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
-                <h3 style="margin: 0 0 5px 0; color: #0f172a; text-transform: uppercase; font-size: 14px;">${diasLabel[d]} - ${workout.title}</h3>
-                <p style="margin: 0; color: #334155; font-size: 12px; white-space: pre-wrap; line-height: 1.5;">${workout.desc}</p>
+            <div style="margin-top: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
+                <h3 style="margin: 0 0 5px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workout.title}</h3>
+                <p style="margin: 0; color: #334155; font-size: 14px; white-space: pre-wrap; line-height: 1.5;">${workout.desc}</p>
             </div>
         `;
     }
-    content += `<p style="text-align: center; font-size: 10px; font-weight: bold; color: #10b981; margin-top: 30px; text-transform: uppercase;">O suor poupa sangue. Cumpra a rotina.</p>`;
+    content += `<p style="text-align: center; font-size: 11px; font-weight: bold; color: #10b981; margin-top: 30px; text-transform: uppercase; page-break-inside: avoid;">O suor poupa sangue. Cumpra a rotina.</p>`;
     
     container.innerHTML = content;
 
-    // Configurações do PDF
     const opt = {
-        margin:       10,
+        margin:       [10, 10, 10, 10], // Margens superior, direita, inferior, esquerda
         filename:     `TAF_Semana_${week}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 }, // windowWidth obriga o canvas a respeitar a largura
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['css', 'avoid-all'] } // Força a respeitar o page-break-inside: avoid do CSS
     };
 
-    // Gera e faz o download direto do PDF
     html2pdf().set(opt).from(container).save();
 }
 
