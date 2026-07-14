@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PLANEJAMENTO TAF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex flex-col p-2 sm:p-4 md:p-6 overflow-x-hidden">
+
+    <div class="max-w-7xl w-full mx-auto flex flex-col gap-4 md:gap-6">
+        
+        <header class="premium-card p-4 md:p-5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-t-4 border-t-emerald-500">
+            <div class="w-full lg:w-auto flex justify-between items-center">
+                <div>
+                    <h1 class="text-lg md:text-xl font-black uppercase tracking-widest text-emerald-500">PLANEJAMENTO TAF</h1>
+                    <p class="text-[10px] md:text-xs text-[var(--text-secondary)] mt-0.5">Gestão de Macrociclo e Controle de Efetivo</p>
+                </div>
+                <div class="flex gap-2 lg:hidden">
+                    <button onclick="toggleTheme()" class="text-slate-500 hover:text-[var(--text-primary)] p-2">
+                        <svg id="icon-sun-mobile" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <svg id="icon-moon-mobile" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                    </button>
+                    <button onclick="openSettingsModal()" class="text-slate-500 hover:text-[var(--text-primary)] p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap lg:flex-nowrap gap-2 w-full lg:w-auto items-center">
+                <button onclick="downloadBackup()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 px-3 py-2.5 rounded-lg transition-all text-xs font-bold uppercase" title="Exportar Backup">Exportar</button>
+                <input type="file" id="import-file" class="hidden" onchange="importBackup(event)" accept=".json">
+                <button onclick="document.getElementById('import-file').click()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 px-3 py-2.5 rounded-lg transition-all text-xs font-bold uppercase" title="Importar Backup">Importar</button>
+                
+                <div class="hidden sm:flex gap-2">
+                    <div class="bg-[var(--bg-app)] rounded-lg p-2 border border-[var(--border-color)] flex-1 min-w-[30%] lg:min-w-[100px] text-center">
+                        <span class="block text-[8px] md:text-[9px] text-[var(--text-secondary)] font-bold uppercase">Flexão</span>
+                        <span class="text-emerald-500 font-black text-xs md:text-sm">42 reps</span>
+                    </div>
+                    <div class="bg-[var(--bg-app)] rounded-lg p-2 border border-[var(--border-color)] flex-1 min-w-[30%] lg:min-w-[100px] text-center">
+                        <span class="block text-[8px] md:text-[9px] text-[var(--text-secondary)] font-bold uppercase">Abdominal</span>
+                        <span class="text-emerald-500 font-black text-xs md:text-sm">53/60s</span>
+                    </div>
+                    <div class="bg-[var(--bg-app)] rounded-lg p-2 border border-[var(--border-color)] flex-1 min-w-[30%] lg:min-w-[100px] text-center">
+                        <span class="block text-[8px] md:text-[9px] text-[var(--text-secondary)] font-bold uppercase">Corrida</span>
+                        <span class="text-emerald-500 font-black text-xs md:text-sm">2410m</span>
+                    </div>
+                </div>
+
+                <button onclick="toggleTheme()" class="hidden lg:flex bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 p-2.5 rounded-lg transition-all" title="Alternar Tema">
+                    <svg id="icon-sun-desktop" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <svg id="icon-moon-desktop" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                </button>
+                <button onclick="openSettingsModal()" class="hidden lg:flex bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 p-2.5 rounded-lg transition-all" title="Configurar Motivos de Falta">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </button>
+            </div>
+        </header>
+
+        <nav class="flex gap-2 overflow-x-auto pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:pb-0 hide-scroll">
+            <button onclick="switchTab('treino')" id="btn-treino" class="flex-shrink-0 sm:flex-1 bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg text-[10px] md:text-xs uppercase tracking-wider transition-all">Treino do Dia</button>
+            <button onclick="switchTab('macrociclo')" id="btn-macrociclo" class="flex-shrink-0 sm:flex-1 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] font-bold py-3 px-4 rounded-lg text-[10px] md:text-xs uppercase tracking-wider transition-all">Macrociclo</button>
+            <button onclick="switchTab('tropa')" id="btn-tropa" class="flex-shrink-0 sm:flex-1 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] font-bold py-3 px-4 rounded-lg text-[10px] md:text-xs uppercase tracking-wider transition-all">Controle Tropa</button>
+        </nav>
+
+        <div id="tab-treino" class="tab-content active flex-col gap-4 md:gap-6">
+            <div class="premium-card p-4 md:p-6 border-l-4 border-l-emerald-500 flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[var(--border-color)] pb-4">
+                    <div>
+                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest block mb-1">Visualizador Diário</span>
+                        <h2 class="text-lg md:text-xl font-black uppercase">Painel de Execução</h2>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <input type="date" id="date-picker" onchange="renderDailyWorkout()" class="premium-input px-3 py-2 text-xs font-bold w-full sm:w-auto">
+                        <button onclick="setToday()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white text-xs font-bold py-2 px-3 rounded-lg transition-all shrink-0">Hoje</button>
+                    </div>
+                </div>
+                <div id="workout-display" class="min-h-[200px]"></div>
+            </div>
+        </div>
+
+        <div id="tab-macrociclo" class="tab-content flex-col gap-4 md:gap-6">
+            <div class="premium-card p-4 md:p-6">
+                <h2 class="text-sm md:text-base font-black uppercase mb-4 tracking-wide border-b border-[var(--border-color)] pb-2">Estrutura do Macrociclo (13/07 a 13/09)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg border border-emerald-500/30">
+                        <h3 class="text-emerald-600 dark:text-emerald-500 font-bold uppercase text-xs mb-1">Fase 1: Adaptação</h3>
+                        <span class="text-[10px] text-[var(--text-secondary)] block mb-2">Semanas 1 a 3</span>
+                        <p class="text-[10px]">Volume alto. Adequação da técnica e base aeróbica. Ritmo controlado.</p>
+                    </div>
+                    <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg border border-amber-500/30">
+                        <h3 class="text-amber-600 dark:text-amber-500 font-bold uppercase text-xs mb-1">Fase 2: Sobrecarga</h3>
+                        <span class="text-[10px] text-[var(--text-secondary)] block mb-2">Semanas 4 a 7</span>
+                        <p class="text-[10px]">Adição de anilhas (5-10kg). Tiros curtos de maior velocidade.</p>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-500/30">
+                        <h3 class="text-blue-600 dark:text-blue-500 font-bold uppercase text-xs mb-1">Fase 3: Polimento</h3>
+                        <span class="text-[10px] text-[var(--text-secondary)] block mb-2">Semanas 8 a 9</span>
+                        <p class="text-[10px]">Redução de volume, simulação de teste real. Pico de performance.</p>
+                    </div>
+                </div>
+
+                <div id="macro-accordion" class="flex flex-col gap-3"></div>
+            </div>
+        </div>
+
+        <div id="tab-tropa" class="tab-content flex-col gap-4 md:gap-6">
+            <div class="premium-card p-4 md:p-5 flex flex-col gap-4">
+                <div class="flex justify-between items-center border-b border-[var(--border-color)] pb-2">
+                    <h2 class="text-xs md:text-sm font-bold uppercase">Gestão de Efetivo</h2>
+                    <span class="text-[10px] text-[var(--text-secondary)]" id="date-attendance-display"></span>
+                </div>
+                
+                <form onsubmit="addStudent(event)" class="flex flex-col sm:flex-row gap-3 items-end">
+                    <div class="flex-1 w-full">
+                        <label class="block text-[9px] md:text-[10px] text-[var(--text-secondary)] font-bold uppercase mb-1">Adicionar Militar (Nome/Guerra)</label>
+                        <input type="text" id="student-name" required placeholder="Ex: Sd Silva" class="w-full premium-input px-3 py-2 text-sm md:text-xs">
+                    </div>
+                    <button type="submit" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 md:py-2.5 px-6 rounded-lg uppercase transition-all">
+                        + Inserir
+                    </button>
+                </form>
+            </div>
+
+            <div class="premium-card overflow-hidden">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left text-xs border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-800/50 border-b border-[var(--border-color)] text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">
+                                <th class="py-3 px-3 md:px-4 font-bold">Militar</th>
+                                <th class="py-3 px-3 md:px-4 font-bold w-1/4">Assiduidade</th>
+                                <th class="py-3 px-3 md:px-4 font-bold text-center">Frequência</th>
+                                <th class="py-3 px-3 md:px-4 font-bold text-center">Lançar Hoje</th>
+                                <th class="py-3 px-3 md:px-4 font-bold text-center">Histórico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-list" class="divide-y divide-[var(--border-color)]"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center py-4 flex flex-col gap-1">
+            <p class="text-[10px] md:text-xs text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-widest">O suor poupa sangue. Cumpra a rotina.</p>
+            <p class="text-[9px] text-[var(--text-secondary)] font-medium">Estudos primam sobre tudo. Sono rigoroso: 21h às 22h. Foco absoluto.</p>
+        </footer>
+
+    </div>
+
+    <div id="modal-absence" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="premium-card p-5 md:p-6 w-full max-w-sm flex flex-col gap-4">
+            <h3 class="text-sm font-bold uppercase text-red-500 dark:text-red-400 border-b border-[var(--border-color)] pb-2">Registrar Falta</h3>
+            <p class="text-xs text-[var(--text-secondary)]" id="absence-student-name"></p>
+            <div class="flex flex-col gap-2" id="absence-reasons-container"></div>
+            <div class="flex gap-2 mt-2">
+                <button onclick="closeAbsenceModal()" class="flex-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-[var(--text-primary)] font-bold py-2 rounded-lg text-xs uppercase transition-all">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-history" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="premium-card p-5 md:p-6 w-full max-w-md flex flex-col gap-4 max-h-[90vh] overflow-y-auto hide-scroll">
+            <div class="flex justify-between items-center border-b border-[var(--border-color)] pb-2">
+                <h3 class="text-sm font-bold uppercase">Análise de Frequência</h3>
+                <button onclick="closeHistoryModal()" class="text-slate-500 hover:text-[var(--text-primary)] font-black">X</button>
+            </div>
+            <div class="text-center">
+                <h4 class="text-lg font-black text-emerald-600 dark:text-emerald-500" id="history-student-name">Militar</h4>
+                <p class="text-[10px] text-[var(--text-secondary)] uppercase font-bold mt-1" id="history-stats-general">0 Presenças | 0 Faltas</p>
+            </div>
+            <div class="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-lg border border-[var(--border-color)] flex flex-col gap-3">
+                <h5 class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Distribuição de Faltas</h5>
+                <div id="history-breakdown" class="flex flex-col gap-2"></div>
+            </div>
+            <div class="flex flex-col gap-2 mt-2">
+                <h5 class="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Últimos Registros (Log)</h5>
+                <div id="history-log" class="flex flex-col gap-1.5 text-[10px] bg-[var(--bg-app)] p-3 rounded border border-[var(--border-color)] max-h-[150px] overflow-y-auto hide-scroll"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="premium-card p-5 md:p-6 w-full max-w-md flex flex-col gap-4">
+            <div class="flex justify-between items-center border-b border-[var(--border-color)] pb-2">
+                <h3 class="text-sm font-bold uppercase">Configurar Motivos</h3>
+                <button onclick="closeSettingsModal()" class="text-slate-500 hover:text-[var(--text-primary)] font-black">X</button>
+            </div>
+            <p class="text-[10px] text-[var(--text-secondary)]">Edite, remova ou adicione os motivos padronizados para ausência no treino.</p>
+            <div class="flex flex-col gap-2" id="settings-categories-list"></div>
+            <form onsubmit="addCategory(event)" class="flex gap-2 mt-2 border-t border-[var(--border-color)] pt-4">
+                <input type="text" id="new-category-name" required placeholder="Novo Motivo (Ex: Outros)" class="flex-1 premium-input px-3 py-1.5 text-xs">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-4 rounded-lg text-xs uppercase shrink-0">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
