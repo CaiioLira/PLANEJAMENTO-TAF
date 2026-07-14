@@ -86,51 +86,52 @@ function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
-    // 1. Criar o contêiner e o conteúdo com estilos inline (garante que nada falhe)
+    // 1. Cria o contêiner e insere no DOM imediatamente
     const container = document.createElement('div');
     container.style.width = '750px';
-    container.style.padding = '40px';
     container.style.backgroundColor = '#ffffff';
     container.style.color = '#000000';
+    container.style.padding = '40px';
     container.style.fontFamily = 'Arial, sans-serif';
-
-    let content = `
-        <style>
-            .treino-box { margin-bottom: 25px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
-            h1 { text-align: center; color: #059669; text-transform: uppercase; font-size: 24px; border-bottom: 3px solid #059669; padding-bottom: 15px; }
-            h3 { color: #000; text-transform: uppercase; font-size: 16px; margin-bottom: 5px; }
-            p { color: #333; font-size: 14px; line-height: 1.5; margin: 0; }
-        </style>
-        <h1>PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>
-    `;
+    
+    // Conteúdo formatado
+    let content = `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
     
     for(let d = 1; d <= 5; d++) {
         const workout = workoutLibrary[phase][d];
         content += `
-            <div class="treino-box">
-                <h3>${diasLabel[d]} - ${workout.title}</h3>
-                <p>${workout.desc.replace(/\n/g, '<br>')}</p>
+            <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
+                <h3 style="margin: 0 0 8px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workout.title}</h3>
+                <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">${workout.desc.replace(/\n/g, '<br>')}</p>
             </div>
         `;
     }
-    content += `<p style="text-align: center; font-size: 12px; font-weight: bold; color: #059669; margin-top: 20px;">O SUOR POUPA SANGUE. CUMPRA A ROTINA.</p>`;
+    content += `<p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px;">O SUOR POUPA SANGUE. CUMPRA A ROTINA.</p>`;
     
     container.innerHTML = content;
     
-    // 2. Injeta temporariamente no corpo para o motor capturar
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
+    // 2. Garante que o elemento seja posicionado fixo, mas visível para o renderizador
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.zIndex = '-1'; // Esconde da tela, mas mantém no fluxo de renderização
     document.body.appendChild(container);
 
-    // 3. Gerar o PDF
+    // 3. Utiliza a API do html2pdf com configuração de renderização forçada
     const opt = {
         margin:       10,
         filename:     `TAF_Semana_${week}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true,
+            allowTaint: true,
+            letterRendering: true
+        },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
+    // 4. Gera o PDF e garante a limpeza após o término
     html2pdf().set(opt).from(container).save().then(() => {
         document.body.removeChild(container);
     });
