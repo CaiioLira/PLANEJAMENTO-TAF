@@ -27,7 +27,7 @@
                         <svg id="icon-moon-mobile" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                     </button>
                     <button onclick="openSettingsModal()" class="text-slate-500 hover:text-[var(--text-primary)] p-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     </button>
                 </div>
             </div>
@@ -112,9 +112,12 @@
 
         <div id="tab-tropa" class="tab-content flex-col gap-4 md:gap-6">
             <div class="premium-card p-4 md:p-5 flex flex-col gap-4">
-                <div class="flex justify-between items-center border-b border-[var(--border-color)] pb-2">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[var(--border-color)] pb-2 gap-3">
                     <h2 class="text-xs md:text-sm font-bold uppercase">Gestão de Efetivo</h2>
-                    <span class="text-[10px] text-[var(--text-secondary)]" id="date-attendance-display"></span>
+                    <div class="flex items-center gap-2">
+                        <label class="text-[9px] md:text-[10px] text-[var(--text-secondary)] font-bold uppercase">Data do Lançamento:</label>
+                        <input type="date" id="attendance-date-picker" class="premium-input px-2 py-1.5 text-xs font-bold">
+                    </div>
                 </div>
                 
                 <form onsubmit="addStudent(event)" class="flex flex-col sm:flex-row gap-3 items-end">
@@ -136,7 +139,7 @@
                                 <th class="py-3 px-3 md:px-4 font-bold">Militar</th>
                                 <th class="py-3 px-3 md:px-4 font-bold w-1/4">Assiduidade</th>
                                 <th class="py-3 px-3 md:px-4 font-bold text-center">Frequência</th>
-                                <th class="py-3 px-3 md:px-4 font-bold text-center">Lançar Hoje</th>
+                                <th class="py-3 px-3 md:px-4 font-bold text-center">Ação na Data</th>
                                 <th class="py-3 px-3 md:px-4 font-bold text-center">Histórico</th>
                             </tr>
                         </thead>

@@ -82,6 +82,32 @@ function getWorkoutInfo(date) {
     return { week, phase, dayOfWeek, title: workout.title, desc: workout.desc };
 }
 
+function printWeek(week) {
+    const phase = getPhase(week);
+    const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    let content = `<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; color: #111;">`;
+    content += `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
+    
+    for(let d = 1; d <= 5; d++) {
+        const workout = workoutLibrary[phase][d];
+        content += `
+            <div style="margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
+                <h3 style="margin: 0 0 8px 0; color: #1e293b; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workout.title}</h3>
+                <p style="margin: 0; color: #475569; font-size: 14px; white-space: pre-line; line-height: 1.5;">${workout.desc}</p>
+            </div>
+        `;
+    }
+    content += `<p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 30px; text-transform: uppercase;">O suor poupa sangue. Cumpra a rotina.</p>`;
+    content += `</div>`;
+    
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Imprimir Semana ' + week + '</title></head><body>');
+    printWindow.document.write(content);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+}
+
 // --- ESTADO DA APLICAÇÃO ---
 let appState = {
     theme: 'dark',
@@ -108,6 +134,13 @@ function loadState() {
             if (parsed.absenceReasons) appState.absenceReasons = parsed.absenceReasons;
         } catch(e) { console.error(e); }
     }
+    
+    if (!appState.absenceReasons["FER"]) appState.absenceReasons["FER"] = { label: "Férias", color: "bg-teal-500" };
+    if (appState.absenceReasons["OUT"]) {
+        delete appState.absenceReasons["OUT"];
+        if (!appState.absenceReasons["ORD"]) appState.absenceReasons["ORD"] = { label: "Ordem Superior", color: "bg-slate-500" };
+    }
+    if (appState.absenceReasons["LES"]) delete appState.absenceReasons["LES"];
 }
 
 function saveState() {
@@ -166,9 +199,12 @@ function setToday() {
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
-    document.getElementById('date-picker').value = `${yyyy}-${mm}-${dd}`;
+    const dateStr = `${yyyy}-${mm}-${dd}`;
     
-    document.getElementById('date-attendance-display').textContent = `Data de Referência: ${dd}/${mm}/${yyyy}`;
+    document.getElementById('date-picker').value = dateStr;
+    const attendancePicker = document.getElementById('attendance-date-picker');
+    if(attendancePicker) attendancePicker.value = dateStr;
+    
     renderDailyWorkout();
 }
 
@@ -181,8 +217,6 @@ function renderDailyWorkout() {
     const info = getWorkoutInfo(date);
     const display = document.getElementById('workout-display');
     
-    document.getElementById('date-attendance-display').textContent = `Data Referência: ${day}/${month}/${year}`;
-
     const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
     const nomeDia = diasSemana[date.getDay()];
 
@@ -240,8 +274,11 @@ function renderMacrocycle() {
 
         weekContainer.innerHTML = `
             <div class="p-4 bg-slate-200 dark:bg-slate-800 flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                <div class="font-black uppercase text-sm text-[var(--text-primary)]">Semana ${w}</div>
-                <div class="text-[10px] font-bold ${phaseColor} uppercase border border-current px-2 py-0.5 rounded">Fase ${phase}</div>
+                <div class="flex items-center gap-3">
+                    <div class="font-black uppercase text-sm text-[var(--text-primary)]">Semana ${w}</div>
+                    <div class="text-[10px] font-bold ${phaseColor} uppercase border border-current px-2 py-0.5 rounded">Fase ${phase}</div>
+                </div>
+                <button onclick="event.stopPropagation(); printWeek(${w})" class="text-[9px] md:text-[10px] bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 text-[var(--text-primary)] px-2 py-1.5 rounded font-bold uppercase transition-all shadow-sm">🖨️ Imprimir</button>
             </div>
             <div class="${w === 1 ? '' : 'hidden'}">
                 ${daysHTML}
@@ -253,6 +290,8 @@ function renderMacrocycle() {
 
 // --- ABA 3: CONTROLE DE TROPA E FALTAS ---
 function getSelectedDate() {
+    const attendancePicker = document.getElementById('attendance-date-picker');
+    if (attendancePicker && attendancePicker.value) return attendancePicker.value;
     return document.getElementById('date-picker').value || new Date().toISOString().split('T')[0];
 }
 
@@ -290,7 +329,10 @@ function openAbsenceModal(id) {
     if (!student) return;
 
     tempStudentIdForAbsence = id;
-    document.getElementById('absence-student-name').textContent = `Militar: ${student.name} | Data: ${getSelectedDate()}`;
+    const selectedDate = getSelectedDate();
+    const [year, month, day] = selectedDate.split('-');
+    
+    document.getElementById('absence-student-name').textContent = `Militar: ${student.name} | Data: ${day}/${month}/${year}`;
     
     const container = document.getElementById('absence-reasons-container');
     container.innerHTML = '';
