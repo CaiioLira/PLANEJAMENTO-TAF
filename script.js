@@ -86,39 +86,54 @@ function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
+    // 1. Cria o elemento temporário
     const container = document.createElement('div');
-    // Largura fixa travada em 800px para garantir que não corte nas laterais
-    container.style.width = '800px'; 
-    container.style.padding = '20px';
-    container.style.fontFamily = 'Helvetica, Arial, sans-serif';
-    container.style.backgroundColor = '#ffffff'; 
+    
+    // 2. Estilização rigorosa para não depender da tela do usuário
+    container.style.position = 'absolute';
+    container.style.left = '-9999px'; // Esconde da área visível
+    container.style.top = '0';
+    container.style.width = '800px';  // Trava a largura
+    container.style.padding = '40px'; 
+    container.style.backgroundColor = '#ffffff';
     container.style.color = '#000000';
+    container.style.fontFamily = 'Arial, sans-serif';
 
-    let content = `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 22px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
+    let content = `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
     
     for(let d = 1; d <= 5; d++) {
         const workout = workoutLibrary[phase][d];
         content += `
-            <div style="margin-top: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
-                <h3 style="margin: 0 0 5px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workout.title}</h3>
-                <p style="margin: 0; color: #334155; font-size: 14px; white-space: pre-wrap; line-height: 1.5;">${workout.desc}</p>
+            <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
+                <h3 style="margin: 0 0 8px 0; color: #0f172a; text-transform: uppercase; font-size: 18px;">${diasLabel[d]} - ${workout.title}</h3>
+                <p style="margin: 0; color: #334155; font-size: 14px; white-space: pre-wrap; line-height: 1.6;">${workout.desc}</p>
             </div>
         `;
     }
-    content += `<p style="text-align: center; font-size: 11px; font-weight: bold; color: #10b981; margin-top: 30px; text-transform: uppercase; page-break-inside: avoid;">O suor poupa sangue. Cumpra a rotina.</p>`;
+    content += `<p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase; page-break-inside: avoid;">O suor poupa sangue. Cumpra a rotina.</p>`;
     
     container.innerHTML = content;
+    
+    // 3. ANEXA ao corpo da página (obrigatório para renderização correta)
+    document.body.appendChild(container);
 
+    // 4. Configura o formato A4
     const opt = {
-        margin:       [10, 10, 10, 10], // Margens superior, direita, inferior, esquerda
+        margin:       10, 
         filename:     `TAF_Semana_${week}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 }, // windowWidth obriga o canvas a respeitar a largura
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['css', 'avoid-all'] } // Força a respeitar o page-break-inside: avoid do CSS
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            windowWidth: 800 // Força o canvas a respeitar os 800px
+        },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(container).save();
+    // 5. Gera o PDF e DESTRÓI o container temporário ao finalizar
+    html2pdf().set(opt).from(container).save().then(() => {
+        document.body.removeChild(container);
+    });
 }
 
 // --- ESTADO DA APLICAÇÃO ---
