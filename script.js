@@ -86,56 +86,63 @@ function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-    // Salva o scroll atual e força o topo para evitar o corte
-    const originalScrollY = window.scrollY;
-    window.scrollTo(0, 0);
-    
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.top = '0';
-    container.style.left = '0';
-    container.style.width = '800px';
-    container.style.padding = '40px';
-    container.style.backgroundColor = '#ffffff';
-    container.style.color = '#000000';
-    container.style.fontFamily = 'Arial, sans-serif';
-    container.style.zIndex = '-9999';
+    // 1. Cria um iframe invisível para isolar a renderização do resto do site
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
 
-    let content = `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
-    
+    // 2. Monta o HTML puro e otimizado para impressão (A4)
+    let content = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>TAF_Semana_${week}</title>
+            <style>
+                body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #000; padding: 20px; line-height: 1.5; }
+                h1 { text-align: center; color: #10b981; font-size: 22px; text-transform: uppercase; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px; }
+                .workout-block { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 15px; page-break-inside: avoid; }
+                h3 { font-size: 16px; margin: 0 0 5px 0; text-transform: uppercase; color: #111; }
+                p { font-size: 14px; margin: 0; color: #333; }
+                .footer { text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase; page-break-inside: avoid; }
+                @media print {
+                    @page { margin: 15mm; }
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>
+    `;
+
     for(let d = 1; d <= 5; d++) {
         const workout = workoutLibrary[phase][d];
         content += `
-            <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
-                <h3 style="margin: 0 0 8px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workout.title}</h3>
-                <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">${workout.desc.replace(/\n/g, '<br>')}</p>
+            <div class="workout-block">
+                <h3>${diasLabel[d]} - ${workout.title}</h3>
+                <p>${workout.desc.replace(/\n/g, '<br>')}</p>
             </div>
         `;
     }
-    content += `<p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase; page-break-inside: avoid;">O suor poupa sangue. Cumpra a rotina.</p>`;
-    
-    container.innerHTML = content;
-    document.body.appendChild(container);
 
-    const opt = {
-        margin:       10,
-        filename:     `TAF_Semana_${week}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-            scale: 2, 
-            useCORS: true,
-            scrollY: 0,
-            scrollX: 0,
-            windowWidth: 800
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+    content += `<div class="footer">O suor poupa sangue. Cumpra a rotina.</div></body></html>`;
 
-    html2pdf().set(opt).from(container).save().then(() => {
-        document.body.removeChild(container);
-        // Devolve o usuário para a posição onde estava antes do clique
-        window.scrollTo(0, originalScrollY);
-    });
+    // 3. Escreve o conteúdo no iframe
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(content);
+    doc.close();
+
+    // 4. Dispara a impressão nativa e limpa o documento
+    setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        
+        // Remove o iframe após o uso
+        setTimeout(() => { document.body.removeChild(iframe); }, 2000);
+    }, 250);
 }
 
 // --- ESTADO DA APLICAÇÃO ---
