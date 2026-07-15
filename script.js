@@ -1,5 +1,5 @@
 // --- AUTENTICAÇÃO (PIN DE SEGURANÇA) ---
-const PIN_SISTEMA = "1234"; // Mude sua senha aqui
+const PIN_SISTEMA = "194"; // Mude sua senha aqui
 let isUnlocked = false;
 let lockTimer;
 
@@ -110,20 +110,45 @@ function getWorkoutInfo(date) {
     return { week, phase, dayOfWeek, title: workout.title, desc: workout.desc };
 }
 
-function printWeek(week) {
+// Helper para converter imagem em Base64
+function getBase64ImageFromURL(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = error => reject(error);
+        img.src = url;
+    });
+}
+
+async function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
+    let logoBase64 = null;
+    try {
+        logoBase64 = await getBase64ImageFromURL('Dom-GDAAE.png');
+    } catch (e) {
+        console.warn("Imagem do logo não pôde ser carregada no PDF.");
+    }
+
     const docDefinition = {
         info: { title: `TAF_Semana_${week}`, author: 'Treinador TAF' },
         content: [
             { text: `PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})`, style: 'header' }
         ],
         styles: {
-            header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 20], color: '#059669' },
+            header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 20], color: '#1e40af' },
             dayTitle: { fontSize: 12, bold: true, margin: [0, 10, 0, 5], color: '#0f172a' },
             desc: { fontSize: 10, margin: [0, 0, 0, 15], color: '#334155', lineHeight: 1.3 },
-            footer: { fontSize: 10, bold: true, alignment: 'center', margin: [0, 30, 0, 0], color: '#059669' }
+            footer: { fontSize: 10, bold: true, alignment: 'center', margin: [0, 10, 0, 0], color: '#1e40af' }
         }
     };
 
@@ -135,7 +160,17 @@ function printWeek(week) {
         );
     }
 
-    docDefinition.content.push({ text: 'O SUOR POUPA SANGUE. CUMPRA A ROTINA.', style: 'footer' });
+    // Insere o Logo logo acima do texto do footer, se carregado com sucesso
+    if (logoBase64) {
+        docDefinition.content.push({
+            image: logoBase64,
+            width: 50,
+            alignment: 'center',
+            margin: [0, 20, 0, 5]
+        });
+    }
+
+    docDefinition.content.push({ text: 'GRUPO AJURICABA. O PIONEIRO DA AMAZÔNIA.\nOrientador 2S SGS LIRA', style: 'footer' });
     pdfMake.createPdf(docDefinition).download(`TAF_Semana_${week}.pdf`);
 }
 
@@ -217,13 +252,13 @@ function switchTab(tabId) {
     document.getElementById(`tab-${tabId}`).classList.add('active');
 
     document.querySelectorAll('button[id^="btn-"]').forEach(btn => {
-        btn.classList.remove('bg-emerald-600', 'text-white');
+        btn.classList.remove('bg-blue-800', 'text-white');
         btn.classList.add('bg-[var(--bg-card)]', 'text-[var(--text-primary)]');
     });
 
     const activeBtn = document.getElementById(`btn-${tabId}`);
     activeBtn.classList.remove('bg-[var(--bg-card)]', 'text-[var(--text-primary)]');
-    activeBtn.classList.add('bg-emerald-600', 'text-white');
+    activeBtn.classList.add('bg-blue-800', 'text-white');
 }
 
 // --- ABA 1: TREINO DO DIA ---
@@ -266,12 +301,12 @@ function renderDailyWorkout() {
 
     display.innerHTML = `
         <div class="flex flex-col gap-2 mb-4">
-            <span class="inline-block bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-1 rounded uppercase w-max">Fase ${info.phase} • Semana ${info.week}</span>
+            <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-400 border border-blue-800/30 text-[10px] font-bold px-2 py-1 rounded uppercase w-max">Fase ${info.phase} • Semana ${info.week}</span>
             <h3 class="text-xl md:text-2xl font-black uppercase text-[var(--text-primary)]">${info.title}</h3>
             <p class="text-[10px] md:text-xs text-[var(--text-secondary)] font-bold uppercase tracking-wider">${nomeDia}, ${day}/${month}/${year}</p>
         </div>
         <div class="bg-slate-100 dark:bg-slate-800/50 p-4 md:p-5 rounded-lg border border-[var(--border-color)]">
-            <h4 class="text-xs font-bold uppercase mb-3 text-emerald-600 dark:text-emerald-500">Protocolo de Execução</h4>
+            <h4 class="text-xs font-bold uppercase mb-3 text-blue-800 dark:text-blue-500">Protocolo de Execução</h4>
             <p class="text-sm text-slate-800 dark:text-slate-300 leading-relaxed font-medium">${formattedDesc}</p>
         </div>
     `;
@@ -285,7 +320,7 @@ function renderMacrocycle() {
 
     for (let w = 1; w <= TOTAL_WEEKS; w++) {
         const phase = getPhase(w);
-        let phaseColor = phase === 1 ? 'text-emerald-600 dark:text-emerald-400' : (phase === 2 ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400');
+        let phaseColor = phase === 1 ? 'text-blue-800 dark:text-blue-400' : (phase === 2 ? 'text-amber-600 dark:text-amber-400' : 'text-purple-600 dark:text-purple-400');
         
         const weekContainer = document.createElement('div');
         weekContainer.className = "bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-[var(--border-color)] overflow-hidden";
@@ -431,7 +466,7 @@ function renderStudents() {
     appState.students.forEach(student => {
         const percentage = student.totalClasses === 0 ? 0 : Math.round((student.attendedClasses / student.totalClasses) * 100);
         
-        let barColor = 'bg-emerald-500';
+        let barColor = 'bg-blue-500';
         if (percentage < 75 && student.totalClasses > 0) barColor = 'bg-amber-500';
         if (percentage < 50 && student.totalClasses > 0) barColor = 'bg-red-500';
 
@@ -444,7 +479,7 @@ function renderStudents() {
             <td class="py-3 px-3 md:px-4 align-middle">
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-[8px] font-bold text-[var(--text-secondary)] uppercase hidden sm:inline">Presença</span>
-                    <span class="text-[9px] md:text-[10px] font-bold ${percentage < 75 ? 'text-amber-500' : 'text-emerald-500'}">${percentage}%</span>
+                    <span class="text-[9px] md:text-[10px] font-bold ${percentage < 75 ? 'text-amber-500' : 'text-blue-500'}">${percentage}%</span>
                 </div>
                 <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-300 dark:border-slate-700">
                     <div class="${barColor} h-1.5 rounded-full transition-all" style="width: ${percentage}%"></div>
@@ -455,7 +490,7 @@ function renderStudents() {
             </td>
             <td class="py-3 px-3 md:px-4 text-center">
                 <div class="flex justify-center gap-1 sm:gap-2">
-                    <button onclick="markPresence('${student.id}')" class="bg-emerald-100 dark:bg-emerald-600/20 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-400 hover:text-white border border-emerald-500/30 font-bold px-2 py-1.5 rounded text-[8px] md:text-[9px] uppercase transition-all">P</button>
+                    <button onclick="markPresence('${student.id}')" class="bg-blue-100 dark:bg-blue-600/20 hover:bg-blue-600 text-blue-900 dark:text-blue-400 hover:text-white border border-blue-800/30 font-bold px-2 py-1.5 rounded text-[8px] md:text-[9px] uppercase transition-all">P</button>
                     <button onclick="openAbsenceModal('${student.id}')" class="bg-red-100 dark:bg-red-900/20 hover:bg-red-800 text-red-700 dark:text-red-400 hover:text-white border border-red-800/50 font-bold px-2 py-1.5 rounded text-[8px] md:text-[9px] uppercase transition-all">F</button>
                 </div>
             </td>
@@ -480,7 +515,7 @@ function openHistoryModal(id) {
     breakdown.innerHTML = '';
 
     if (faltas === 0) {
-        breakdown.innerHTML = '<p class="text-[10px] text-emerald-500 text-center font-bold">Militar 100% assíduo.</p>';
+        breakdown.innerHTML = '<p class="text-[10px] text-blue-500 text-center font-bold">Militar 100% assíduo.</p>';
     } else {
         const reasonCounts = {};
         student.logs.filter(l => !l.present).forEach(l => {
@@ -517,7 +552,7 @@ function openHistoryModal(id) {
             const parts = log.date.split('-');
             const dateFmt = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : log.date;
             if (log.present) {
-                logContainer.innerHTML += `<div class="flex justify-between border-b border-slate-300 dark:border-slate-700/50 pb-1"><span class="text-emerald-600 dark:text-emerald-500 font-bold">PRESENÇA</span> <span>${dateFmt}</span></div>`;
+                logContainer.innerHTML += `<div class="flex justify-between border-b border-slate-300 dark:border-slate-700/50 pb-1"><span class="text-blue-800 dark:text-blue-500 font-bold">PRESENÇA</span> <span>${dateFmt}</span></div>`;
             } else {
                 const rInfo = appState.absenceReasons[log.reason] || { label: 'Desconhecido' };
                 logContainer.innerHTML += `<div class="flex justify-between border-b border-slate-300 dark:border-slate-700/50 pb-1"><span class="text-red-500 dark:text-red-400 font-bold">FALTA: ${rInfo.label}</span> <span>${dateFmt}</span></div>`;
