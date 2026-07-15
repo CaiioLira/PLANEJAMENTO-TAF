@@ -112,7 +112,7 @@ function printWeek(week) {
         );
     }
 
-    docDefinition.content.push({ text: 'O SUOR POUPA SANGUE. CUMPRA A ROTINA.', style: 'footer' });
+    docDefinition.content.push({ text: 'GRUPO AJURICABA, O PIONEIRO DA AMAZÔNIA.', style: 'footer' });
 
     // 3. Gera e baixa o arquivo imediatamente
     pdfMake.createPdf(docDefinition).download(`TAF_Semana_${week}.pdf`);
