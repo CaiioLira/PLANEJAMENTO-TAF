@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PLANEJAMENTO TAF</title>
-<script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script>
         tailwind.config = { darkMode: 'class' }
     </script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -39,7 +37,7 @@
             <div class="flex flex-wrap lg:flex-nowrap gap-2 w-full lg:w-auto items-center">
                 <button onclick="downloadBackup()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 px-3 py-2.5 rounded-lg transition-all text-xs font-bold uppercase" title="Exportar Backup">Exportar</button>
                 <input type="file" id="import-file" class="hidden" onchange="importBackup(event)" accept=".json">
-                <button onclick="document.getElementById('import-file').click()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 px-3 py-2.5 rounded-lg transition-all text-xs font-bold uppercase" title="Importar Backup">Importar</button>
+                <button onclick="requireAdmin(() => document.getElementById('import-file').click())" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-[var(--text-primary)] border border-slate-300 dark:border-slate-600 px-3 py-2.5 rounded-lg transition-all text-xs font-bold uppercase" title="Importar Backup">Importar</button>
                 
                 <div class="hidden sm:flex gap-2">
                     <div class="bg-[var(--bg-app)] rounded-lg p-2 border border-[var(--border-color)] flex-1 min-w-[30%] lg:min-w-[100px] text-center">
@@ -154,8 +152,8 @@
         </div>
 
         <footer class="text-center py-4 flex flex-col gap-1">
-            <p class="text-[10px] md:text-xs text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-widest">Grupo Ajuricaba. O Pioneiro da Amazônia.</p>
-            <p class="text-[9px] text-[var(--text-secondary)] font-medium">Orientador 2S SGS LIRA</p>
+            <p class="text-[10px] md:text-xs text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-widest">O suor poupa sangue. Cumpra a rotina.</p>
+            <p class="text-[9px] text-[var(--text-secondary)] font-medium">Estudos primam sobre tudo. Sono rigoroso: 21h às 22h. Foco absoluto.</p>
         </footer>
 
     </div>

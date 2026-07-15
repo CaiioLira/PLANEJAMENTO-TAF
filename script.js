@@ -1,3 +1,31 @@
+// --- AUTENTICAÇÃO (PIN DE SEGURANÇA) ---
+const PIN_SISTEMA = "1234"; // Mude sua senha aqui
+let isUnlocked = false;
+let lockTimer;
+
+function requireAdmin(callback) {
+    if (isUnlocked) {
+        resetLockTimer();
+        callback();
+        return;
+    }
+    const senha = prompt("Acesso restrito. Insira o PIN para autorizar a edição:");
+    if (senha === PIN_SISTEMA) {
+        isUnlocked = true;
+        resetLockTimer();
+        callback();
+    } else if (senha !== null) {
+        alert("PIN incorreto. Acesso negado.");
+    }
+}
+
+function resetLockTimer() {
+    clearTimeout(lockTimer);
+    lockTimer = setTimeout(() => {
+        isUnlocked = false;
+    }, 60000); // Trava automaticamente após 60.000 ms (1 minuto) de inatividade
+}
+
 // --- TEMA E DARK MODE ---
 function toggleTheme() {
     document.documentElement.classList.toggle('dark');
@@ -86,12 +114,8 @@ function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
-    // 1. Define a estrutura do documento mapeando os dados (Sua lógica)
     const docDefinition = {
-        info: {
-            title: `TAF_Semana_${week}`,
-            author: 'Treinador TAF'
-        },
+        info: { title: `TAF_Semana_${week}`, author: 'Treinador TAF' },
         content: [
             { text: `PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})`, style: 'header' }
         ],
@@ -103,7 +127,6 @@ function printWeek(week) {
         }
     };
 
-    // 2. Extrai os dias exatos da base de dados e injeta no PDF
     for(let d = 1; d <= 5; d++) {
         const workout = workoutLibrary[phase][d];
         docDefinition.content.push(
@@ -112,9 +135,7 @@ function printWeek(week) {
         );
     }
 
-    docDefinition.content.push({ text: 'GRUPO AJURICABA. O PIONEIRO DA AMAZÔNIA.', style: 'footer' });
-
-    // 3. Gera e baixa o arquivo imediatamente
+    docDefinition.content.push({ text: 'O SUOR POUPA SANGUE. CUMPRA A ROTINA.', style: 'footer' });
     pdfMake.createPdf(docDefinition).download(`TAF_Semana_${week}.pdf`);
 }
 
@@ -168,24 +189,26 @@ function downloadBackup() {
 }
 
 function importBackup(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const imported = JSON.parse(e.target.result);
-            if(imported && imported.students) {
-                appState = imported;
-                saveState();
-                applyTheme();
-                renderStudents();
-                alert("Backup importado com sucesso!");
+    requireAdmin(() => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if(imported && imported.students) {
+                    appState = imported;
+                    saveState();
+                    applyTheme();
+                    renderStudents();
+                    alert("Backup importado com sucesso!");
+                }
+            } catch(err) {
+                alert("Erro ao ler o arquivo de backup.");
             }
-        } catch(err) {
-            alert("Erro ao ler o arquivo de backup.");
-        }
-    };
-    reader.readAsText(file);
+        };
+        reader.readAsText(file);
+    });
 }
 
 // --- NAVEGAÇÃO ---
@@ -307,55 +330,61 @@ function getSelectedDate() {
 
 function addStudent(e) {
     e.preventDefault();
-    const nameInput = document.getElementById('student-name');
-    const name = nameInput.value.trim();
-    if (!name) return;
+    requireAdmin(() => {
+        const nameInput = document.getElementById('student-name');
+        const name = nameInput.value.trim();
+        if (!name) return;
 
-    appState.students.push({ id: Date.now().toString(), name: name, totalClasses: 0, attendedClasses: 0, logs: [] });
-    nameInput.value = '';
-    saveState();
-    renderStudents();
+        appState.students.push({ id: Date.now().toString(), name: name, totalClasses: 0, attendedClasses: 0, logs: [] });
+        nameInput.value = '';
+        saveState();
+        renderStudents();
+    });
 }
 
 function markPresence(id) {
-    const student = appState.students.find(s => s.id === id);
-    if (!student) return;
+    requireAdmin(() => {
+        const student = appState.students.find(s => s.id === id);
+        if (!student) return;
 
-    const date = getSelectedDate();
-    if (student.logs.some(l => l.date === date)) {
-        if(!confirm("Já existe um registro para este militar na data selecionada. Deseja registrar novamente (contabilizará +1)?")) return;
-    }
+        const date = getSelectedDate();
+        if (student.logs.some(l => l.date === date)) {
+            if(!confirm("Já existe um registro para este militar na data selecionada. Deseja registrar novamente (contabilizará +1)?")) return;
+        }
 
-    student.totalClasses += 1;
-    student.attendedClasses += 1;
-    student.logs.push({ date: date, present: true, reason: null });
-    
-    saveState();
-    renderStudents();
+        student.totalClasses += 1;
+        student.attendedClasses += 1;
+        student.logs.push({ date: date, present: true, reason: null });
+        
+        saveState();
+        renderStudents();
+    });
 }
 
 function openAbsenceModal(id) {
-    const student = appState.students.find(s => s.id === id);
-    if (!student) return;
+    requireAdmin(() => {
+        const student = appState.students.find(s => s.id === id);
+        if (!student) return;
 
-    tempStudentIdForAbsence = id;
-    const selectedDate = getSelectedDate();
-    const [year, month, day] = selectedDate.split('-');
-    
-    document.getElementById('absence-student-name').textContent = `Militar: ${student.name} | Data: ${day}/${month}/${year}`;
-    
-    const container = document.getElementById('absence-reasons-container');
-    container.innerHTML = '';
-    
-    Object.keys(appState.absenceReasons).forEach(key => {
-        const btn = document.createElement('button');
-        btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase transition-all hover:opacity-80 text-white ${appState.absenceReasons[key].color}`;
-        btn.textContent = appState.absenceReasons[key].label;
-        btn.onclick = () => confirmAbsence(key);
-        container.appendChild(btn);
+        tempStudentIdForAbsence = id;
+        const selectedDate = getSelectedDate();
+        const [year, month, day] = selectedDate.split('-');
+        
+        document.getElementById('absence-student-name').textContent = `Militar: ${student.name} | Data: ${day}/${month}/${year}`;
+        
+        const container = document.getElementById('absence-reasons-container');
+        container.innerHTML = '';
+        
+        Object.keys(appState.absenceReasons).forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold uppercase transition-all hover:opacity-80 text-white ${appState.absenceReasons[key].color}`;
+            btn.textContent = appState.absenceReasons[key].label;
+            btn.onclick = () => confirmAbsence(key);
+            container.appendChild(btn);
+        });
+
+        document.getElementById('modal-absence').classList.remove('hidden');
     });
-
-    document.getElementById('modal-absence').classList.remove('hidden');
 }
 
 function closeAbsenceModal() {
@@ -381,11 +410,13 @@ function confirmAbsence(reasonKey) {
 }
 
 function removeStudent(id) {
-    if(confirm("Confirma exclusão permanente deste militar?")) {
-        appState.students = appState.students.filter(s => s.id !== id);
-        saveState();
-        renderStudents();
-    }
+    requireAdmin(() => {
+        if(confirm("Confirma exclusão permanente deste militar?")) {
+            appState.students = appState.students.filter(s => s.id !== id);
+            saveState();
+            renderStudents();
+        }
+    });
 }
 
 function renderStudents() {
@@ -503,8 +534,10 @@ function closeHistoryModal() {
 
 // --- CONFIGURAÇÃO DE MOTIVOS ---
 function openSettingsModal() {
-    renderSettingsCategories();
-    document.getElementById('modal-settings').classList.remove('hidden');
+    requireAdmin(() => {
+        renderSettingsCategories();
+        document.getElementById('modal-settings').classList.remove('hidden');
+    });
 }
 
 function closeSettingsModal() {
