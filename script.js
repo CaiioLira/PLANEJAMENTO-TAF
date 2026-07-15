@@ -85,64 +85,37 @@ function getWorkoutInfo(date) {
 function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    
+    // 1. Define a estrutura do documento mapeando os dados (Sua lógica)
+    const docDefinition = {
+        info: {
+            title: `TAF_Semana_${week}`,
+            author: 'Treinador TAF'
+        },
+        content: [
+            { text: `PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})`, style: 'header' }
+        ],
+        styles: {
+            header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 20], color: '#059669' },
+            dayTitle: { fontSize: 12, bold: true, margin: [0, 10, 0, 5], color: '#0f172a' },
+            desc: { fontSize: 10, margin: [0, 0, 0, 15], color: '#334155', lineHeight: 1.3 },
+            footer: { fontSize: 10, bold: true, alignment: 'center', margin: [0, 30, 0, 0], color: '#059669' }
+        }
+    };
 
-    // 1. Cria um iframe invisível para isolar a renderização do resto do site
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.width = '0px';
-    iframe.style.height = '0px';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-
-    // 2. Monta o HTML puro e otimizado para impressão (A4)
-    let content = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>TAF_Semana_${week}</title>
-            <style>
-                body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #000; padding: 20px; line-height: 1.5; }
-                h1 { text-align: center; color: #10b981; font-size: 22px; text-transform: uppercase; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px; }
-                .workout-block { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 15px; page-break-inside: avoid; }
-                h3 { font-size: 16px; margin: 0 0 5px 0; text-transform: uppercase; color: #111; }
-                p { font-size: 14px; margin: 0; color: #333; }
-                .footer { text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase; page-break-inside: avoid; }
-                @media print {
-                    @page { margin: 15mm; }
-                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                }
-            </style>
-        </head>
-        <body>
-            <h1>PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>
-    `;
-
+    // 2. Extrai os dias exatos da base de dados e injeta no PDF
     for(let d = 1; d <= 5; d++) {
         const workout = workoutLibrary[phase][d];
-        content += `
-            <div class="workout-block">
-                <h3>${diasLabel[d]} - ${workout.title}</h3>
-                <p>${workout.desc.replace(/\n/g, '<br>')}</p>
-            </div>
-        `;
+        docDefinition.content.push(
+            { text: `${diasLabel[d]} - ${workout.title}`, style: 'dayTitle' },
+            { text: workout.desc, style: 'desc' }
+        );
     }
 
-    content += `<div class="footer">O suor poupa sangue. Cumpra a rotina.</div></body></html>`;
+    docDefinition.content.push({ text: 'O SUOR POUPA SANGUE. CUMPRA A ROTINA.', style: 'footer' });
 
-    // 3. Escreve o conteúdo no iframe
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(content);
-    doc.close();
-
-    // 4. Dispara a impressão nativa e limpa o documento
-    setTimeout(() => {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        
-        // Remove o iframe após o uso
-        setTimeout(() => { document.body.removeChild(iframe); }, 2000);
-    }, 250);
+    // 3. Gera e baixa o arquivo imediatamente
+    pdfMake.createPdf(docDefinition).download(`TAF_Semana_${week}.pdf`);
 }
 
 // --- ESTADO DA APLICAÇÃO ---
