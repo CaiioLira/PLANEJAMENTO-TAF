@@ -86,38 +86,53 @@ function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     
-    // Passamos todo o layout diretamente para uma variável de texto
-    let content = `
-        <div style="padding: 20px; font-family: Helvetica, Arial, sans-serif; color: #000; background-color: #fff; width: 100%;">
-            <h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 20px; border-bottom: 2px solid #10b981; padding-bottom: 10px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>
-    `;
-    
-    for(let d = 1; d <= 5; d++) {
-        const workout = workoutLibrary[phase][d];
-        content += `
-            <div style="margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 15px; page-break-inside: avoid;">
-                <h3 style="font-size: 16px; margin: 0 0 5px 0; text-transform: uppercase;">${diasLabel[d]} - ${workout.title}</h3>
-                <p style="font-size: 13px; line-height: 1.5; margin: 0;">${workout.desc.replace(/\n/g, '<br>')}</p>
-            </div>
-        `;
-    }
-    
-    content += `
-            <p style="text-align: center; font-size: 11px; font-weight: bold; color: #10b981; margin-top: 30px;">O SUOR POUPA SANGUE. CUMPRA A ROTINA.</p>
+    // 1. Estrutura blindada com largura fixa e estilo inline puro
+    const content = `
+        <div style="width: 800px; padding: 40px; font-family: Arial, sans-serif; background-color: #ffffff; color: #000000;">
+            <h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px;">
+                PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})
+            </h1>
+            ${Array.from({length: 5}, (_, i) => i + 1).map(d => `
+                <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
+                    <h3 style="margin: 0 0 8px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workoutLibrary[phase][d].title}</h3>
+                    <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">${workoutLibrary[phase][d].desc.replace(/\n/g, '<br>')}</p>
+                </div>
+            `).join('')}
+            <p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase;">
+                O suor poupa sangue. Cumpra a rotina.
+            </p>
         </div>
     `;
 
-    // Configuração de impressão
+    // 2. Elemento temporário alocado fisicamente, mas invisível
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.top = '0';
+    tempDiv.style.left = '0';
+    tempDiv.style.zIndex = '-9999';
+    tempDiv.style.opacity = '0'; 
+    tempDiv.style.pointerEvents = 'none';
+    document.body.appendChild(tempDiv);
+
+    // 3. Configuração forçando o eixo Y e largura
     const opt = {
         margin:       10,
         filename:     `TAF_Semana_${week}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true,
+            scrollY: 0, // Ignora a rolagem atual do usuário
+            windowWidth: 800 // Força o enquadramento perfeito
+        },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Gera o PDF diretamente a partir do texto, sem tocar no DOM (tela)
-    html2pdf().set(opt).from(content).save();
+    // 4. Executa a captura no primeiro filho e remove o temporário
+    html2pdf().set(opt).from(tempDiv.firstElementChild).save().then(() => {
+        document.body.removeChild(tempDiv);
+    });
 }
 
 // --- ESTADO DA APLICAÇÃO ---
