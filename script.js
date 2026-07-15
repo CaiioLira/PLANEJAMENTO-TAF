@@ -85,37 +85,38 @@ function getWorkoutInfo(date) {
 function printWeek(week) {
     const phase = getPhase(week);
     const diasLabel = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    // Salva o scroll atual e força o topo para evitar o corte
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
     
-    // 1. Estrutura blindada com largura fixa e estilo inline puro
-    const content = `
-        <div style="width: 800px; padding: 40px; font-family: Arial, sans-serif; background-color: #ffffff; color: #000000;">
-            <h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px;">
-                PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})
-            </h1>
-            ${Array.from({length: 5}, (_, i) => i + 1).map(d => `
-                <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
-                    <h3 style="margin: 0 0 8px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workoutLibrary[phase][d].title}</h3>
-                    <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">${workoutLibrary[phase][d].desc.replace(/\n/g, '<br>')}</p>
-                </div>
-            `).join('')}
-            <p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase;">
-                O suor poupa sangue. Cumpra a rotina.
-            </p>
-        </div>
-    `;
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '800px';
+    container.style.padding = '40px';
+    container.style.backgroundColor = '#ffffff';
+    container.style.color = '#000000';
+    container.style.fontFamily = 'Arial, sans-serif';
+    container.style.zIndex = '-9999';
 
-    // 2. Elemento temporário alocado fisicamente, mas invisível
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.top = '0';
-    tempDiv.style.left = '0';
-    tempDiv.style.zIndex = '-9999';
-    tempDiv.style.opacity = '0'; 
-    tempDiv.style.pointerEvents = 'none';
-    document.body.appendChild(tempDiv);
+    let content = `<h1 style="text-align: center; color: #10b981; text-transform: uppercase; font-size: 24px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 30px;">PLANEJAMENTO TAF - SEMANA ${week} (FASE ${phase})</h1>`;
+    
+    for(let d = 1; d <= 5; d++) {
+        const workout = workoutLibrary[phase][d];
+        content += `
+            <div style="margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; page-break-inside: avoid;">
+                <h3 style="margin: 0 0 8px 0; color: #0f172a; text-transform: uppercase; font-size: 16px;">${diasLabel[d]} - ${workout.title}</h3>
+                <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">${workout.desc.replace(/\n/g, '<br>')}</p>
+            </div>
+        `;
+    }
+    content += `<p style="text-align: center; font-size: 12px; font-weight: bold; color: #10b981; margin-top: 40px; text-transform: uppercase; page-break-inside: avoid;">O suor poupa sangue. Cumpra a rotina.</p>`;
+    
+    container.innerHTML = content;
+    document.body.appendChild(container);
 
-    // 3. Configuração forçando o eixo Y e largura
     const opt = {
         margin:       10,
         filename:     `TAF_Semana_${week}.pdf`,
@@ -123,15 +124,17 @@ function printWeek(week) {
         html2canvas:  { 
             scale: 2, 
             useCORS: true,
-            scrollY: 0, // Ignora a rolagem atual do usuário
-            windowWidth: 800 // Força o enquadramento perfeito
+            scrollY: 0,
+            scrollX: 0,
+            windowWidth: 800
         },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 4. Executa a captura no primeiro filho e remove o temporário
-    html2pdf().set(opt).from(tempDiv.firstElementChild).save().then(() => {
-        document.body.removeChild(tempDiv);
+    html2pdf().set(opt).from(container).save().then(() => {
+        document.body.removeChild(container);
+        // Devolve o usuário para a posição onde estava antes do clique
+        window.scrollTo(0, originalScrollY);
     });
 }
 
